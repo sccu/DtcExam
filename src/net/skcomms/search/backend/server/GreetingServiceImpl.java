@@ -1,5 +1,8 @@
 package net.skcomms.search.backend.server;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import net.skcomms.search.backend.client.GreetingService;
 import net.skcomms.search.backend.shared.FieldVerifier;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -10,6 +13,13 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 @SuppressWarnings("serial")
 public class GreetingServiceImpl extends RemoteServiceServlet implements
 		GreetingService {
+	
+	private static final Map<String, Person> friends = new HashMap<String, Person>();
+	
+	static {
+		Person jang = new Jang();
+		friends.put(jang.getName(), jang);
+	}
 
 	public String greetServer(String input) throws IllegalArgumentException {
 		// Verify that the input is valid. 
@@ -24,11 +34,17 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 		String userAgent = getThreadLocalRequest().getHeader("User-Agent");
 
 		// Escape data from the client to avoid cross-site script vulnerabilities.
-		input = escapeHtml(input);
+		String name = escapeHtml(input);
 		userAgent = escapeHtml(userAgent);
+		
+		Person person = friends.get(name);
+		if (person == null) {
+			return name + ".. Have I met you?";
+		}
+		else {
+			return "Welcome back, " + person.getName() + "!!";
+		}
 
-		return "Hello, " + input + "!<br><br>I am running " + serverInfo
-				+ ".<br><br>It looks like you are using:<br>" + userAgent;
 	}
 
 	/**
