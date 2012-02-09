@@ -17,8 +17,8 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 	private static final Map<String, Person> friends = new HashMap<String, Person>();
 	
 	static {
-		Person jang = new Jang();
-		friends.put(jang.getName(), jang);
+		Person kang = new Kang("Kang");
+		friends.put(kang.getName(), kang);
 	}
 
 	public String greetServer(String input) throws IllegalArgumentException {
@@ -39,7 +39,9 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 		
 		Person person = friends.get(name);
 		if (person == null) {
-			return name + ".. Have I met you?";
+			person = new Kang(name);
+			friends.put(person.getName(), person);
+			return name + ".. Welcome to my test page.";
 		}
 		else {
 			return "Welcome back, " + person.getName() + "!!";
