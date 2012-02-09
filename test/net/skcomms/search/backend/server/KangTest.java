@@ -15,7 +15,7 @@ public class KangTest {
 
 	@Test
 	public void test() {
-		Person person = new Kang("Kang");
+		Person person = new Kang();
 		assertEquals("Kang", person.getName());
 	}
 

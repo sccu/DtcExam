@@ -17,7 +17,9 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 	private static final Map<String, Person> friends = new HashMap<String, Person>();
 	
 	static {
-		Person kang = new Kang("Kang");
+		Person jang = new Jang();
+		friends.put(jang.getName(), jang);
+		Person kang = new Kang();
 		friends.put(kang.getName(), kang);
 	}
 
@@ -39,9 +41,7 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 		
 		Person person = friends.get(name);
 		if (person == null) {
-			person = new Kang(name);
-			friends.put(person.getName(), person);
-			return name + ".. Welcome to my test page.";
+			return name + ".. Have I met you?";
 		}
 		else {
 			return "Welcome back, " + person.getName() + "!!";
