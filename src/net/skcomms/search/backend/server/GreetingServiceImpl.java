@@ -19,6 +19,8 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 	static {
 		Person jang = new Jang();
 		friends.put(jang.getName(), jang);
+		Person kang = new Kang();
+		friends.put(kang.getName(), kang);
 	}
 
 	public String greetServer(String input) throws IllegalArgumentException {
