@@ -6,16 +6,25 @@ import java.util.Map;
 import net.skcomms.search.backend.client.GreetingService;
 import net.skcomms.search.backend.shared.FieldVerifier;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import net.skcomms.search.backend.server.Visitor;
 
 /**
  * The server side implementation of the RPC service.
  */
-
 @SuppressWarnings("serial")
-public class GreetingServiceImpl extends RemoteServiceServlet implements GreetingService {
+public class GreetingServiceImpl extends RemoteServiceServlet implements
+		GreetingService {
 	
 	private static final Map<String, Person> friends = new HashMap<String, Person>();
+	
+	static {
+		Person jang = new Jang();
+		Person kang = new Kang();
+		Person seok = new Seok();
+		friends.put(jang.getName(), jang);
+		friends.put(kang.getName(), kang);
+		friends.put(seok.getName(), seok);
+		
+	}
 
 	public String greetServer(String input) throws IllegalArgumentException {
 		// Verify that the input is valid. 
@@ -32,13 +41,9 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
 		// Escape data from the client to avoid cross-site script vulnerabilities.
 		String name = escapeHtml(input);
 		userAgent = escapeHtml(userAgent);
-
-
+		
 		Person person = friends.get(name);
 		if (person == null) {
-			Visitor visitor = new Visitor();
-			visitor.setName(name);
-			friends.put(visitor.getName(), visitor);
 			return name + ".. Have I met you?";
 		}
 		else {
