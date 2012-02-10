@@ -1,0 +1,2 @@
+serviceClass: net.skcomms.search.backend.client.GreetingService
+path: 1985B2C39A0505F2484A40E0260CD215.gwt.rpc
