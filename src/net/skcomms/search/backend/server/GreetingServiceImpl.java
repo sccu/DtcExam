@@ -19,11 +19,11 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 	static {
 		Person jang = new Jang();
 		Person kang = new Kang();
-		Person seok = new Seok();		
 		friends.put(jang.getName(), jang);
 		friends.put(kang.getName(), kang);
-		friends.put(seok.getName(), seok);
 		
+		Person seok = new Seok();		
+		friends.put(seok.getName(), seok);
 	}
 
 	public String greetServer(String input) throws IllegalArgumentException {
