@@ -19,8 +19,10 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 	static {
 		Person jang = new Jang();
 		Person kang = new Kang();
+		Person kim = new Kim();
 		friends.put(jang.getName(), jang);
 		friends.put(kang.getName(), kang);
+		friends.put(kim.getName(), kim);
 		
 	}
 
