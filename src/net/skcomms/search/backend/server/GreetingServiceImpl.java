@@ -19,12 +19,15 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 	static {
 		Person jang = new Jang();
 		friends.put(jang.getName(), jang);
-
+		
 		Person kang = new Kang();
 		friends.put(kang.getName(), kang);
 
 		Person seok = new Seok();		
 		friends.put(seok.getName(), seok);
+		
+		Person kim = new Kim();
+		friends.put(kim.getName(), kim);
 	}
 
 	public String greetServer(String input) throws IllegalArgumentException {
@@ -33,7 +36,7 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 			// If the input is not valid, throw an IllegalArgumentException back to
 			// the client.
 			throw new IllegalArgumentException(
-					"Name must be at least 4 characters long");
+					"Name must be at least 3 characters long");
 		}
 
 		String serverInfo = getServletContext().getServerInfo();
