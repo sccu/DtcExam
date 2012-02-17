@@ -15,6 +15,15 @@ import com.google.gwt.user.client.ui.Image;
  *
  */
 final class ContactInfoCell extends AbstractCell<ContactInfo> {
+	
+	private static final ContactInfoCell instance = new ContactInfoCell();
+
+	public static ContactInfoCell getInstacne() {
+		return instance;
+	}
+	
+	private ContactInfoCell() {}
+	
 	@Override
 	public void render(Context context, ContactInfo contactInfo, SafeHtmlBuilder sb) {
 		Image image = new Image();

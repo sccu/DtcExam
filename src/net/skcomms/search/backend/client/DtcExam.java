@@ -18,12 +18,12 @@ import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.StackLayoutPanel;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
@@ -32,6 +32,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class DtcExam implements EntryPoint {
+
 	/**
 	 * Create a remote service proxy to talk to the server-side Greeting
 	 * service.
@@ -39,43 +40,26 @@ public class DtcExam implements EntryPoint {
 	private final GreetingServiceAsync greetingService = GWT
 			.create(GreetingService.class);
 
-	private List<ContactInfo> values = new ArrayList<ContactInfo>();
+	private final StackLayoutPanel stackLayoutPanel = new StackLayoutPanel(Unit.EM);
 
+	private static final SelectionModel<ContactInfo> SELECTION_MODEL = new SingleSelectionModel<ContactInfo>();
+	
 	/**
 	 * This is the entry point method.
 	 */
 	@Override
 	public void onModuleLoad() {
 		
-		final StackLayoutPanel stackLayoutPanel = new StackLayoutPanel(Unit.EM);
-		stackLayoutPanel.setSize("300px", "400px");
+		stackLayoutPanel.setSize("300px", "300px");
+		stackLayoutPanel.animate(100);
 		RootPanel.get("topPanelContainer").add(stackLayoutPanel);
 		
-		final CellList<ContactInfo> jangList = new CellList<ContactInfo>(
-			new ContactInfoCell());
-		
-		final CellList<ContactInfo> kuwonList = new CellList<ContactInfo>(
-			new ContactInfoCell());
-		
-		stackLayoutPanel.add(new ScrollPanel(jangList), new HTML("Jang's Contact List"), 2);
-		stackLayoutPanel.add(new HTML("Kang's content"), new HTML("Kang's Contact List"), 2);
-		stackLayoutPanel.add(new HTML("Kim's content"), new HTML("Kim's Contact List"), 2);
-		stackLayoutPanel.add(new ScrollPanel(kuwonList), new HTML("Kuwon's Contact List"), 2);
-		stackLayoutPanel.add(new HTML("Lee's content"), new HTML("Lee's Contact List"), 2);
-		stackLayoutPanel.add(new HTML("Shin's content"), new HTML("Shin's Contact List"), 2);
-		stackLayoutPanel.animate(100);
-		
-		// Add a selection model to handle user selection.
-	    final SelectionModel<ContactInfo> selectionModel = new SingleSelectionModel<ContactInfo>();
-	    selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-	      public void onSelectionChange(SelectionChangeEvent event) {
-	        ContactInfo selected = ((SingleSelectionModel<ContactInfo>) selectionModel).getSelectedObject();
-	        if (selected != null) {
-	          //Window.alert("You selected: " + selected);
-	        }
-	      }
-	    });
-	    jangList.setSelectionModel(selectionModel);
+		addPersonalPanel("Jang's Contact List");
+		addPersonalPanel("Kang's Contact List");
+		addPersonalPanel("Kuwon's Contact List");
+		addPersonalPanel("Kim's Contact List");
+		addPersonalPanel("Seok's Contact List");
+		addPersonalPanel("Shin's Contact List");
 	    
 		final Button sendButton = new Button("Send");
 		final TextBox nameField = new TextBox();
@@ -101,17 +85,11 @@ public class DtcExam implements EntryPoint {
 
 		// Create a handler for the sendButton and nameField
 		class MyHandler implements ClickHandler, KeyUpHandler {
-			/**
-			 * Fired when the user clicks on the sendButton.
-			 */
 			@Override
 			public void onClick(ClickEvent event) {
 				sendNameToServer();
 			}
 
-			/**
-			 * Fired when the user types in the nameField.
-			 */
 			@Override
 			public void onKeyUp(KeyUpEvent event) {
 				if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
@@ -129,8 +107,7 @@ public class DtcExam implements EntryPoint {
 
 				// First, we validate the input.
 				if (!FieldVerifier.isValidName(nameField.getText())) {
-					nameErrorLabel
-							.setText("Please enter at least 3 characters");
+					nameErrorLabel.setText("Please enter at least 3 characters");
 					return;
 				}
 
@@ -149,12 +126,16 @@ public class DtcExam implements EntryPoint {
 
 						@Override
 						public void onSuccess(ContactInfo contactInfo) {
-							stackLayoutPanel.getVisibleWidget();
-							// FIXME values 리스트를 현재 표시되는 스택에 따라 선택되도록 수정.
+							Widget w = stackLayoutPanel.getVisibleWidget();
+							@SuppressWarnings("unchecked")
+							CellList<ContactInfo> list = 
+								((CellList<ContactInfo>) ((ScrollPanel) w).getWidget());
+							@SuppressWarnings("unchecked")
+							List<ContactInfo> values = (List<ContactInfo>) list.getLayoutData();
 							if (!values.contains(contactInfo)) {
 							    values.add(contactInfo);
-							    jangList.setRowCount(values.size(), true);
-								jangList.setRowData(0, values);
+							    list.setRowCount(values.size(), true);
+								list.setRowData(0, values);
 							}
 						}
 					});
@@ -165,5 +146,29 @@ public class DtcExam implements EntryPoint {
 		MyHandler handler = new MyHandler();
 		sendButton.addClickHandler(handler);
 		nameField.addKeyUpHandler(handler);
+	}
+
+	/**
+	 * @param header
+	 */
+	private void addPersonalPanel(String header) {
+		List<ContactInfo> contactInfos = new ArrayList<ContactInfo>();
+		
+		CellList<ContactInfo> cellList = new CellList<ContactInfo>(
+			ContactInfoCell.getInstacne());
+		cellList.setLayoutData(contactInfos);
+		
+		SELECTION_MODEL.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+			public void onSelectionChange(SelectionChangeEvent event) {
+				ContactInfo selected = ((SingleSelectionModel<ContactInfo>) SELECTION_MODEL)
+						.getSelectedObject();
+				if (selected != null) {
+					// Window.alert("You selected: " + selected);
+				}
+			}
+		});
+	    cellList.setSelectionModel(SELECTION_MODEL);
+		
+		stackLayoutPanel.add(new ScrollPanel(cellList), header, 2);
 	}
 }
