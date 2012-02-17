@@ -42,7 +42,19 @@ public class DtcExam implements EntryPoint {
 
 	private final StackLayoutPanel stackLayoutPanel = new StackLayoutPanel(Unit.EM);
 
-	private static final SelectionModel<ContactInfo> SELECTION_MODEL = new SingleSelectionModel<ContactInfo>();
+	private static final SelectionModel<ContactInfo> SELECTION_MODEL = 
+			new SingleSelectionModel<ContactInfo>();
+	static {
+		SELECTION_MODEL.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+			public void onSelectionChange(SelectionChangeEvent event) {
+				ContactInfo selected = ((SingleSelectionModel<ContactInfo>) SELECTION_MODEL)
+						.getSelectedObject();
+				if (selected != null) {
+					// Window.alert("You selected: " + selected);
+				}
+			}
+		});
+	}
 	
 	/**
 	 * This is the entry point method.
@@ -158,15 +170,6 @@ public class DtcExam implements EntryPoint {
 			ContactInfoCell.getInstacne());
 		cellList.setLayoutData(contactInfos);
 		
-		SELECTION_MODEL.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-			public void onSelectionChange(SelectionChangeEvent event) {
-				ContactInfo selected = ((SingleSelectionModel<ContactInfo>) SELECTION_MODEL)
-						.getSelectedObject();
-				if (selected != null) {
-					// Window.alert("You selected: " + selected);
-				}
-			}
-		});
 	    cellList.setSelectionModel(SELECTION_MODEL);
 		
 		stackLayoutPanel.add(new ScrollPanel(cellList), header, 2);
