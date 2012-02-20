@@ -62,8 +62,7 @@ public class DtcExam implements EntryPoint {
 	@Override
 	public void onModuleLoad() {
 		
-		stackLayoutPanel.setSize("300px", "300px");
-		stackLayoutPanel.animate(100);
+		stackLayoutPanel.setSize("300px", "400px");
 		RootPanel.get("topPanelContainer").add(stackLayoutPanel);
 		
 		addPersonalPanel("Jang's Contact List");
