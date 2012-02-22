@@ -137,17 +137,12 @@ public class DtcExam implements EntryPoint {
 
 						@Override
 						public void onSuccess(ContactInfo contactInfo) {
-							Widget w = stackLayoutPanel.getVisibleWidget();
+							Widget scrollPanel = stackLayoutPanel.getVisibleWidget();
+							Widget cellWidget = ((ScrollPanel) scrollPanel).getWidget();
 							@SuppressWarnings("unchecked")
-							CellList<ContactInfo> list = 
-								((CellList<ContactInfo>) ((ScrollPanel) w).getWidget());
-							@SuppressWarnings("unchecked")
-							List<ContactInfo> values = (List<ContactInfo>) list.getLayoutData();
-							if (!values.contains(contactInfo)) {
-							    values.add(contactInfo);
-							    list.setRowCount(values.size(), true);
-								list.setRowData(0, values);
-							}
+							DataBox<ContactInfo> box = 
+								(DataBox<ContactInfo>) cellWidget.getLayoutData();
+							box.add(contactInfo);
 						}
 					});
 			}
@@ -163,13 +158,23 @@ public class DtcExam implements EntryPoint {
 	 * @param header
 	 */
 	private void addPersonalPanel(String header) {
-		List<ContactInfo> contactInfos = new ArrayList<ContactInfo>();
+		final List<ContactInfo> values = new ArrayList<ContactInfo>();
 		
-		CellList<ContactInfo> cellList = new CellList<ContactInfo>(
+		final CellList<ContactInfo> cellList = new CellList<ContactInfo>(
 			ContactInfoCell.getInstacne());
-		cellList.setLayoutData(contactInfos);
-		
 	    cellList.setSelectionModel(SELECTION_MODEL);
+		
+		DataBox<ContactInfo> box = new DataBox<ContactInfo>() {
+			@Override
+			public void add(ContactInfo contactInfo) {
+				if (!values.contains(contactInfo)) {
+				    values.add(contactInfo);
+				    cellList.setRowCount(values.size(), true);
+					cellList.setRowData(0, values);
+				}
+			}
+		};
+		cellList.setLayoutData(box);
 		
 		stackLayoutPanel.add(new ScrollPanel(cellList), header, 2);
 	}
