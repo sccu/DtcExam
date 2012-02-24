@@ -20,10 +20,12 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.cellview.client.CellTree;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSelectionPolicy;
+import com.google.gwt.user.cellview.client.TreeNode;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.StackLayoutPanel;
@@ -210,7 +212,6 @@ public class DtcExam implements EntryPoint {
 		final CellTree cellTree = new CellTree(model, null);		
 		cellTree.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.ENABLED);
 		
-		
 		final List<ContactInfo> values = new ArrayList<ContactInfo>();
 		DataBox<ContactInfo> box = new DataBox<ContactInfo>() {
 			@Override
@@ -218,8 +219,16 @@ public class DtcExam implements EntryPoint {
 				if (!values.contains(contactInfo)) {
 					values.add(contactInfo);
 					((CustomTreeModel1)model).addContactInfo(contactInfo);
-					//cellTree.
-					//cellList.setRowCount(values.size(), true);
+
+				    // Open the first playlist by default.
+				    TreeNode rootNode = cellTree.getRootTreeNode();
+				    TreeNode firstPlaylist = rootNode.setChildOpen(0, true);
+				    rootNode.setChildOpen(0, true, true);
+				    				    
+				    firstPlaylist.setChildOpen(0, true);
+				    firstPlaylist.setChildOpen(0, true, true);
+
+				    //cellList.setRowCount(values.size(), true);
 					//cellList.setRowData(0, values);
 				}
 			}
