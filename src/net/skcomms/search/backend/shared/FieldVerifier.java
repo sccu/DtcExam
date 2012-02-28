@@ -1,5 +1,6 @@
 package net.skcomms.search.backend.shared;
 
+
 /**
  * <p>
  * FieldVerifier validates that the name the user enters is valid.
@@ -38,5 +39,16 @@ public class FieldVerifier {
 			return false;
 		}
 		return name.length() > 2;
+	}
+
+	/**
+	 * Verifies that the specified email is valid for our service.
+	 * 
+	 * @param email an e-mail string
+	 * @return true if valid email format; false otherwise.
+	 */
+	public static boolean isValidEmail(String email) {
+		final String emailPattern = "^[\\w-_\\.+]*[\\w-_\\.]\\@([\\w]+\\.)+[\\w]+[\\w]$";
+		return email.matches(emailPattern);
 	}
 }
