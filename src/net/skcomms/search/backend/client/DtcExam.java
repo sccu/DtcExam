@@ -1,7 +1,9 @@
 package net.skcomms.search.backend.client;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import net.skcomms.search.backend.shared.ContactInfo;
 import net.skcomms.search.backend.shared.FieldVerifier;
@@ -14,7 +16,10 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.cellview.client.CellBrowser;
 import com.google.gwt.user.cellview.client.CellList;
+import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSelectionPolicy;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -27,10 +32,13 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.google.gwt.view.client.TreeViewModel;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
  */
+
+
 public class DtcExam implements EntryPoint {
 
 	/**
@@ -41,6 +49,9 @@ public class DtcExam implements EntryPoint {
 			.create(GreetingService.class);
 
 	private final StackLayoutPanel stackLayoutPanel = new StackLayoutPanel(Unit.EM);
+		
+
+	private Map<Object, DataBox<ContactInfo>> widgetDataMap = new HashMap<Object, DataBox<ContactInfo>>();
 
 	private static final SelectionModel<ContactInfo> SELECTION_MODEL = 
 			new SingleSelectionModel<ContactInfo>();
@@ -55,14 +66,15 @@ public class DtcExam implements EntryPoint {
 			}
 		});
 	}
-	
+
+ 	
 	/**
 	 * This is the entry point method.
 	 */
 	@Override
 	public void onModuleLoad() {
 		
-		stackLayoutPanel.setSize("300px", "400px");
+		stackLayoutPanel.setSize("600px", "400px");
 		RootPanel.get("topPanelContainer").add(stackLayoutPanel);
 		
 		addPersonalPanel("Jang's Contact List");
@@ -137,11 +149,8 @@ public class DtcExam implements EntryPoint {
 
 						@Override
 						public void onSuccess(ContactInfo contactInfo) {
-							Widget scrollPanel = stackLayoutPanel.getVisibleWidget();
-							Widget cellWidget = ((ScrollPanel) scrollPanel).getWidget();
-							@SuppressWarnings("unchecked")
-							DataBox<ContactInfo> box = 
-								(DataBox<ContactInfo>) cellWidget.getLayoutData();
+							Widget w = stackLayoutPanel.getVisibleWidget();
+							DataBox<ContactInfo> box = widgetDataMap.get(w);
 							box.add(contactInfo);
 						}
 					});
@@ -158,12 +167,14 @@ public class DtcExam implements EntryPoint {
 	 * @param header
 	 */
 	private void addPersonalPanel(String header) {
-		final List<ContactInfo> values = new ArrayList<ContactInfo>();
 		
+		/*
+		final List<ContactInfo> values = new ArrayList<ContactInfo>();
+
 		final CellList<ContactInfo> cellList = new CellList<ContactInfo>(
 			ContactInfoCell.getInstacne());
 	    cellList.setSelectionModel(SELECTION_MODEL);
-		
+
 		DataBox<ContactInfo> box = new DataBox<ContactInfo>() {
 			@Override
 			public void add(ContactInfo contactInfo) {
@@ -175,7 +186,27 @@ public class DtcExam implements EntryPoint {
 			}
 		};
 		cellList.setLayoutData(box);
-		
+
 		stackLayoutPanel.add(new ScrollPanel(cellList), header, 2);
+		*/
+		
+		
+		final TreeViewModel model = new ContactInfoTreeView();
+		final CellBrowser cellBrowser = new CellBrowser(model, null);		
+		cellBrowser.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.ENABLED);		
+		//cellBrowser.setSelectionModel(SELECTION_MODEL);
+		
+		DataBox<ContactInfo> box = new DataBox<ContactInfo>() 
+		{
+			@Override
+			public void add(ContactInfo contactInfo) {
+
+				((ContactInfoTreeView) model).addNode(contactInfo);
+			}
+		};
+		
+		cellBrowser.setLayoutData(box);
+		widgetDataMap.put(cellBrowser, box);
+		stackLayoutPanel.add(cellBrowser, header, 2);
 	}
 }
