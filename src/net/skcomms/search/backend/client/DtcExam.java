@@ -8,6 +8,8 @@ import java.util.Map;
 import net.skcomms.search.backend.shared.ContactInfo;
 import net.skcomms.search.backend.shared.FieldVerifier;
 
+import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -17,8 +19,10 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellBrowser;
 import com.google.gwt.user.cellview.client.CellList;
+import com.google.gwt.user.cellview.client.CellTree;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSelectionPolicy;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -73,13 +77,12 @@ public class DtcExam implements EntryPoint {
 	@Override
 	public void onModuleLoad() {
 		
-		stackLayoutPanel.setSize("600px", "400px");
+		stackLayoutPanel.setSize("800px", "500px");
 		RootPanel.get("topPanelContainer").add(stackLayoutPanel);
 		
 		addPersonalPanel("Jang's Contact List");
 		addJangPanel("Jang's Contact Browser");
-		addPersonalPanel("Kang's Contact List");
-		//addPersonalPanel("Kuwon's Contact List");
+		addKangPanel("Kang's Contact List");
 		addKuwonPanel("Kuwon's Contact Browser");
 		addPersonalPanel("Kim's Contact List");
 		addSeokPanel("Seok's Contact List");
@@ -164,62 +167,6 @@ public class DtcExam implements EntryPoint {
 		nameField.addKeyUpHandler(handler);
 	}
 
-	private void addJangPanel(String header) {
-		final List<String> categories = new ArrayList<String>();
-		//categories.add("Myself");
-		categories.add("Family");
-		final List<ContactInfo> contactInfos = new ArrayList<ContactInfo>();
-		contactInfos.add(new ContactInfo("Yang", "abc@sk.com", "Family"));
-		final ListDataProvider<String> rootProvider = new ListDataProvider<String>(categories);
-		
-		class MyTreeViewModel implements TreeViewModel {
-			@Override
-			public <T> NodeInfo<?> getNodeInfo(T value) {
-				if (value == null) {
-					return new DefaultNodeInfo<String>(rootProvider, new TextCell());
-				}
-				else if (value instanceof String) {
-					ListDataProvider<ContactInfo> provider = new ListDataProvider<ContactInfo>();
-					for (ContactInfo ci : contactInfos) {
-						if (ci.getCategory().equals(value)) {
-							provider.getList().add(ci);
-						}
-					}
-					return new DefaultNodeInfo<ContactInfo>(provider, ContactInfoCell.getInstacne());
-				}
-				
-				return null;
-			}
-
-			@Override
-			public boolean isLeaf(Object value) {
-				return (value instanceof ContactInfo);
-			}
-			
-			public void refresh() {
-				rootProvider.refresh();
-			}
-		};
-		final MyTreeViewModel treeViewModel = new MyTreeViewModel();
-		final CellBrowser browser = new CellBrowser(treeViewModel, null);
-		browser.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.ENABLED);
-		
-		DataBox<ContactInfo> box = new DataBox<ContactInfo>() {
-			@Override
-			public void add(ContactInfo contactInfo) {
-				if (!contactInfos.contains(contactInfo)) {
-				    contactInfos.add(contactInfo);
-				}
-				if (!categories.contains(contactInfo.getCategory())) {
-					categories.add(contactInfo.getCategory());
-				}
-				treeViewModel.refresh();
-			}
-		};
-		
-		widgetDataMap.put(browser, box);
-		stackLayoutPanel.add(browser, header, 2);
-	}
 
 	private void addKuwonPanel(String header) {
 		final List<String> categories = new ArrayList<String>();
@@ -249,7 +196,7 @@ public class DtcExam implements EntryPoint {
 						// get existing one
 						provider = categoryMap.get(category);
 					}										
-					return new DefaultNodeInfo<ContactInfo>(provider, ContactInfoCell.getInstacne());
+					return new DefaultNodeInfo<ContactInfo>(provider, ContactInfoCell.getInstance());
 				}
 				return null;
 			}
@@ -300,11 +247,106 @@ public class DtcExam implements EntryPoint {
 	/**
 	 * @param header
 	 */
+	private void addJangPanel(String header) {
+		final List<String> categories = new ArrayList<String>();
+		//categories.add("Myself");
+		categories.add("Family");
+		final List<ContactInfo> contactInfos = new ArrayList<ContactInfo>();
+		contactInfos.add(new ContactInfo("Yang", "abc@sk.com", "Family"));
+		final ListDataProvider<String> rootProvider = new ListDataProvider<String>(categories);
+		
+		class MyTreeViewModel implements TreeViewModel {
+			@Override
+			public <T> NodeInfo<?> getNodeInfo(T value) {
+				if (value == null) {
+					return new DefaultNodeInfo<String>(rootProvider, new TextCell());
+				}
+				else if (value instanceof String) {
+					ListDataProvider<ContactInfo> provider = new ListDataProvider<ContactInfo>();
+					for (ContactInfo ci : contactInfos) {
+						if (ci.getCategory().equals(value)) {
+							provider.getList().add(ci);
+						}
+					}
+					return new DefaultNodeInfo<ContactInfo>(provider, ContactInfoCell.getInstance());
+				}
+				
+				return null;
+			}
+
+			@Override
+			public boolean isLeaf(Object value) {
+				return (value instanceof ContactInfo);
+			}
+			
+			public void refresh() {
+				rootProvider.refresh();
+			}
+		};
+		final MyTreeViewModel treeViewModel = new MyTreeViewModel();
+		final CellBrowser browser = new CellBrowser(treeViewModel, null);
+		browser.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.ENABLED);
+		
+		DataBox<ContactInfo> box = new DataBox<ContactInfo>() {
+			@Override
+			public void add(ContactInfo contactInfo) {
+				if (!contactInfos.contains(contactInfo)) {
+				    contactInfos.add(contactInfo);
+				}
+				if (!categories.contains(contactInfo.getCategory())) {
+					categories.add(contactInfo.getCategory());
+				}
+				treeViewModel.refresh();
+			}
+		};
+		
+		widgetDataMap.put(browser, box);
+		stackLayoutPanel.add(browser, header, 2);
+	}
+	
+	public static class CategoryNode {
+		private final String Categoryname;
+		private final List<ContactInfo> contactInfos = new ArrayList<ContactInfo>();
+
+		private CategoryNode parent;
+	
+		
+		public CategoryNode(String Categoryname) {
+			this.Categoryname = Categoryname;
+			parent = null;
+		}
+
+		public String getName() {
+			return Categoryname;
+		}
+
+		public List<ContactInfo> getContactInfos() {
+			return contactInfos;
+		}
+		
+		public ContactInfo addInfo(ContactInfo contactInfo) {
+			contactInfos.add(contactInfo);
+			return contactInfo;
+		}
+		
+		public void refresh() {
+		
+		      if(parent!=null) {  
+		          parent.refresh();  
+		        }  
+		}
+
+	}
+	
+
+	/**
+	 * @param header
+	 */
 	private void addPersonalPanel(String header) {
 		final List<ContactInfo> values = new ArrayList<ContactInfo>();
 
 		final CellList<ContactInfo> cellList = new CellList<ContactInfo>(
-			ContactInfoCell.getInstacne());
+			ContactInfoCell.getInstance());
 	    cellList.setSelectionModel(SELECTION_MODEL);
 
 		DataBox<ContactInfo> box = new DataBox<ContactInfo>() {
@@ -340,5 +382,118 @@ public class DtcExam implements EntryPoint {
 		
 		widgetDataMap.put(cellBrowser, box);
 		stackLayoutPanel.add(cellBrowser, header, 2);
+	}
+
+	private static class Category {
+		private final String name;
+		private final List<ContactInfo> contactInfos = new ArrayList<ContactInfo>();
+		
+		public Category(String name) {
+			this.name = name;
+		}
+		
+		public String getName() {
+			return name;
+		}
+		
+		public List<ContactInfo> getContactInfos() {
+			return contactInfos;
+		}
+
+		public ContactInfo add(ContactInfo contactInfo) {
+			contactInfos.add(contactInfo);
+			return contactInfo;
+		}
+	}
+	
+	private void addKangPanel(String header) {
+		class KangsTreeViewModel implements TreeViewModel {
+			final List<Category> categories = new ArrayList<Category>();
+			final ListDataProvider<Category> rootProvider;
+			final Map<Object, ListDataProvider<ContactInfo>> providerMap = new HashMap<Object, ListDataProvider<ContactInfo>>();
+			
+			public KangsTreeViewModel() {
+				Category category = new Category("I");
+				category.add(new ContactInfo("Kang", "pelcious@sk.com", "I"));
+				categories.add(category);
+				rootProvider = new ListDataProvider<Category>(categories);
+			}
+
+			public List<Category> getRootList() {
+				return categories;
+			}
+				
+			public <T> NodeInfo<?> getNodeInfo(T value) {
+				if (value == null) { // root node
+					Cell<Category> cell = new AbstractCell<Category>() {
+						public void render(Context context, Category value, SafeHtmlBuilder sb) {
+							sb.appendEscaped(value.getName());
+						}
+					};
+					
+					return new DefaultNodeInfo<Category>(rootProvider, cell);
+				} else if (value instanceof Category) {
+					ListDataProvider<ContactInfo> dataProvider = new ListDataProvider<ContactInfo>(((Category) value).getContactInfos());
+					
+					for (ContactInfo contactInfo : ((Category) value).getContactInfos()) {
+						if (contactInfo.getCategory().equals(value)) {
+							dataProvider.getList().add(contactInfo);
+							
+						}
+					}
+					
+					providerMap.put(value, dataProvider);
+					
+					return new DefaultNodeInfo<ContactInfo>(dataProvider, ContactInfoCell.getInstance());
+				}
+
+				return null;
+			}
+			public boolean isLeaf(Object value) {
+			      return (value instanceof ContactInfo);
+			}
+
+			public void refresh(Category category) {
+				rootProvider.refresh();
+				providerMap.get(category).refresh();
+			}
+			
+			public int getIndex(String CategoryName) {
+				int Index = -1;
+				for( int i=0; i<categories.size(); i++) {
+					if (CategoryName.equals(categories.get(i).getName())) {
+						Index = i;
+					}
+				}
+				return Index;
+			}
+			
+			public void add(ContactInfo contactInfo) {
+				if (this.getIndex(contactInfo.getCategory())<0) {
+					categories.add(new Category(contactInfo.getCategory()));	
+					java.lang.System.out.println("OK");
+				}
+				if (!categories.get(this.getIndex(contactInfo.getCategory())).contactInfos.contains(contactInfo)) {
+					 categories.get(this.getIndex(contactInfo.getCategory())).add(contactInfo);
+				} else {
+					java.lang.System.out.println("Not");
+				}
+			}
+		}
+			
+		final KangsTreeViewModel kangsTreeViewModel = new KangsTreeViewModel();
+		
+		final ScrollPanel scrollPanel = new ScrollPanel(new CellTree(kangsTreeViewModel, null));
+		
+		DataBox<ContactInfo> box = new DataBox<ContactInfo>() {
+			public void add(ContactInfo contactInfo) {
+				List<Category> categories = kangsTreeViewModel.getRootList();
+				kangsTreeViewModel.add(contactInfo);
+				kangsTreeViewModel.refresh(categories.get(kangsTreeViewModel.getIndex(contactInfo.getCategory())));
+			}
+		};
+		
+		widgetDataMap.put(scrollPanel, box);
+		stackLayoutPanel.add(scrollPanel, header, 2);
 	}
 }

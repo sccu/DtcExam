@@ -40,7 +40,6 @@ public class ContactInfoTreeView implements TreeViewModel {
 		}
 		else
 		{
-			@SuppressWarnings("unchecked")
 			ListDataProvider<ContactInfo> contactInfoDataProvider = 
 					contactInfoDataProviderMap.get(info.getCategory());
 			
@@ -65,7 +64,7 @@ public class ContactInfoTreeView implements TreeViewModel {
 			ListDataProvider<ContactInfo> dataProvider = 
 					contactInfoDataProviderMap.get((String)value);
 					
-            return new DefaultNodeInfo<ContactInfo>(dataProvider, ContactInfoCell.getInstacne());
+            return new DefaultNodeInfo<ContactInfo>(dataProvider, ContactInfoCell.getInstance());
 		}
 		
 		return null;

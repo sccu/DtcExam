@@ -18,7 +18,7 @@ final class ContactInfoCell extends AbstractCell<ContactInfo> {
 	
 	private static final ContactInfoCell instance = new ContactInfoCell();
 
-	public static ContactInfoCell getInstacne() {
+	public static ContactInfoCell getInstance() {
 		return instance;
 	}
 	
