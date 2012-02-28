@@ -37,6 +37,9 @@ final class ContactInfoCell extends AbstractCell<ContactInfo> {
 		else if (contactInfo.getName().equals("Jang")) {
 			image.setUrl("http://ssl.gstatic.com/onebox-korea/e5adcf92403713df.jpg");
 		}
+		else if (contactInfo.getName().equals("Kuwon")) {
+			image.setUrl("http://cfs13.tistory.com/upload_control/download.blog?fhandle=YmxvZzIwNTg2QGZzMTMudGlzdG9yeS5jb206L2F0dGFjaC8wLzI3MDAwMDAwMDAwNy5qcGc%3D");
+		}
 		else {
 			image.setUrl("http://t1.gstatic.com/images?q=tbn:ANd9GcSlCSbbm87uDJiPgjXdvfq6msCJf3v9Jb6XYrEn2CtkyYGrFhBJ3Q");
 		}

@@ -51,6 +51,7 @@ public class DtcExam implements EntryPoint {
 
 	private final StackLayoutPanel stackLayoutPanel = new StackLayoutPanel(Unit.EM);
 	private Map<Object, DataBox<ContactInfo>> widgetDataMap = new HashMap<Object, DataBox<ContactInfo>>();
+	private Map<String, ListDataProvider<ContactInfo>> categoryMap = new HashMap<String, ListDataProvider<ContactInfo>>();
 	private static final SelectionModel<ContactInfo> SELECTION_MODEL = 
 			new SingleSelectionModel<ContactInfo>();
 	static {
@@ -78,7 +79,8 @@ public class DtcExam implements EntryPoint {
 		addPersonalPanel("Jang's Contact List");
 		addJangPanel("Jang's Contact Browser");
 		addPersonalPanel("Kang's Contact List");
-		addPersonalPanel("Kuwon's Contact List");
+		//addPersonalPanel("Kuwon's Contact List");
+		addKuwonPanel("Kuwon's Contact Browser");
 		addPersonalPanel("Kim's Contact List");
 		addSeokPanel("Seok's Contact List");
 		addPersonalPanel("Shin's Contact List");
@@ -219,6 +221,82 @@ public class DtcExam implements EntryPoint {
 		stackLayoutPanel.add(browser, header, 2);
 	}
 
+	private void addKuwonPanel(String header) {
+		final List<String> categories = new ArrayList<String>();
+		categories.add("Myself");
+		//categories.add("Family");
+		final List<ContactInfo> contactInfos = new ArrayList<ContactInfo>();
+		contactInfos.add(new ContactInfo("Kuwon", "solikang@sk.com", "Myself"));
+		//final ListDataProvider<String> rootProvider = new ListDataProvider<String>(categories);
+		
+		class MyTreeViewModel implements TreeViewModel {
+			private ListDataProvider<String> rootProvider = new ListDataProvider<String>(categories);
+			@Override
+			public <T> NodeInfo<?> getNodeInfo(T value) {
+				if (value == null) {
+					return new DefaultNodeInfo<String>(rootProvider, new TextCell());
+				}
+				else if (value instanceof String) {
+					String category = (String)value;
+					ListDataProvider<ContactInfo> provider;
+					
+					if(categoryMap.isEmpty()) {
+						// add new one
+						provider = new ListDataProvider<ContactInfo>();
+						provider.getList().add(contactInfos.get(0));
+						categoryMap.put(category, provider);
+					} else {
+						// get existing one
+						provider = categoryMap.get(category);
+					}										
+					return new DefaultNodeInfo<ContactInfo>(provider, ContactInfoCell.getInstacne());
+				}
+				return null;
+			}
+
+			@Override
+			public boolean isLeaf(Object value) {
+				return (value instanceof ContactInfo);
+			}
+			
+			public void refresh() {
+				rootProvider.refresh();
+			}
+
+			public void addProvider(ContactInfo contactInfo) {
+				String category = contactInfo.getCategory();
+				if(!categoryMap.containsKey(category)) {
+					ListDataProvider<ContactInfo> provider = new ListDataProvider<ContactInfo>();
+					provider.getList().add(contactInfo);
+					categoryMap.put(category, provider);
+				} else {
+					ListDataProvider<ContactInfo> provider = categoryMap.get(category);
+					provider.getList().add(contactInfo);
+				}
+			}
+		};
+		final MyTreeViewModel treeViewModel = new MyTreeViewModel();
+		final CellBrowser browser = new CellBrowser(treeViewModel, null);
+		browser.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.ENABLED);
+		
+		DataBox<ContactInfo> box = new DataBox<ContactInfo>() {
+			@Override
+			public void add(ContactInfo contactInfo) {
+				if (!contactInfos.contains(contactInfo)) {
+				    contactInfos.add(contactInfo);
+				    treeViewModel.addProvider(contactInfo);
+				}
+				if (!categories.contains(contactInfo.getCategory())) {
+					categories.add(contactInfo.getCategory());
+				}
+				treeViewModel.refresh();
+			}
+		};
+		
+		widgetDataMap.put(browser, box);
+		stackLayoutPanel.add(browser, header, 2);
+	}
+	
 	/**
 	 * @param header
 	 */
