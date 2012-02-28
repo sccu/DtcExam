@@ -4,7 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.skcomms.search.backend.client.GreetingService;
+import net.skcomms.search.backend.shared.ContactInfo;
 import net.skcomms.search.backend.shared.FieldVerifier;
+
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 /**
@@ -30,6 +32,7 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 		friends.put(kim.getName(), kim);
 	}
 
+	@Override
 	public String greetServer(String input) throws IllegalArgumentException {
 		// Verify that the input is valid. 
 		if (!FieldVerifier.isValidName(input)) {
@@ -39,12 +42,9 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 					"Name must be at least 3 characters long");
 		}
 
-		String serverInfo = getServletContext().getServerInfo();
-		String userAgent = getThreadLocalRequest().getHeader("User-Agent");
 
 		// Escape data from the client to avoid cross-site script vulnerabilities.
 		String name = escapeHtml(input);
-		userAgent = escapeHtml(userAgent);
 		
 		Person person = friends.get(name);
 		if (person == null) {
@@ -69,5 +69,34 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 		}
 		return html.replaceAll("&", "&amp;").replaceAll("<", "&lt;")
 				.replaceAll(">", "&gt;");
+	}
+
+	/**
+	 * 
+	 */
+	@Override
+	public ContactInfo createNameCard(String name, String email) {
+		if (!FieldVerifier.isValidName(name)) {
+			throw new IllegalArgumentException(
+					"Name must be at least 3 characters long");
+		}
+
+		if (!FieldVerifier.isValidEmail(email)) {
+			throw new IllegalArgumentException(
+					"Email must match the vaild format");
+		}
+		
+		name = escapeHtml(name);
+		email = escapeHtml(email);
+		String category;
+		
+		if (friends.containsKey(name)) {
+			category = "Friend";
+		}
+		else {
+			category = "Unknown";
+		}
+		
+		return new ContactInfo(name, email, category);
 	}
 }
