@@ -38,6 +38,8 @@ import com.google.gwt.view.client.TreeViewModel;
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
  */
+
+
 public class DtcExam implements EntryPoint {
 
 	/**
@@ -48,9 +50,7 @@ public class DtcExam implements EntryPoint {
 			.create(GreetingService.class);
 
 	private final StackLayoutPanel stackLayoutPanel = new StackLayoutPanel(Unit.EM);
-
 	private Map<Object, DataBox<ContactInfo>> widgetDataMap = new HashMap<Object, DataBox<ContactInfo>>();
-
 	private static final SelectionModel<ContactInfo> SELECTION_MODEL = 
 			new SingleSelectionModel<ContactInfo>();
 	static {
@@ -64,14 +64,15 @@ public class DtcExam implements EntryPoint {
 			}
 		});
 	}
-	
+
+ 	
 	/**
 	 * This is the entry point method.
 	 */
 	@Override
 	public void onModuleLoad() {
 		
-		stackLayoutPanel.setSize("500px", "400px");
+		stackLayoutPanel.setSize("600px", "400px");
 		RootPanel.get("topPanelContainer").add(stackLayoutPanel);
 		
 		addPersonalPanel("Jang's Contact List");
@@ -79,7 +80,7 @@ public class DtcExam implements EntryPoint {
 		addPersonalPanel("Kang's Contact List");
 		addPersonalPanel("Kuwon's Contact List");
 		addPersonalPanel("Kim's Contact List");
-		addPersonalPanel("Seok's Contact List");
+		addSeokPanel("Seok's Contact List");
 		addPersonalPanel("Shin's Contact List");
 	    
 		final Button sendButton = new Button("Send");
@@ -223,11 +224,11 @@ public class DtcExam implements EntryPoint {
 	 */
 	private void addPersonalPanel(String header) {
 		final List<ContactInfo> values = new ArrayList<ContactInfo>();
-		
+
 		final CellList<ContactInfo> cellList = new CellList<ContactInfo>(
 			ContactInfoCell.getInstacne());
 	    cellList.setSelectionModel(SELECTION_MODEL);
-		
+
 		DataBox<ContactInfo> box = new DataBox<ContactInfo>() {
 			@Override
 			public void add(ContactInfo contactInfo) {
@@ -242,5 +243,24 @@ public class DtcExam implements EntryPoint {
 		ScrollPanel panel = new ScrollPanel(cellList);
 		widgetDataMap.put(panel, box);
 		stackLayoutPanel.add(panel, header, 2);
+	}	
+		
+	private void addSeokPanel(String header) {
+		final ContactInfoTreeView model = new ContactInfoTreeView();
+		final CellBrowser cellBrowser = new CellBrowser(model, null);		
+		cellBrowser.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.ENABLED);		
+		//cellBrowser.setSelectionModel(SELECTION_MODEL);
+		
+		DataBox<ContactInfo> box = new DataBox<ContactInfo>() 
+		{
+			@Override
+			public void add(ContactInfo contactInfo) {
+
+				model.addNode(contactInfo);
+			}
+		};
+		
+		widgetDataMap.put(cellBrowser, box);
+		stackLayoutPanel.add(cellBrowser, header, 2);
 	}
 }
