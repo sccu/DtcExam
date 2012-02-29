@@ -69,8 +69,21 @@ public class DtcExam implements EntryPoint {
 			}
 		});
 	}
-
- 	
+	
+	private static final SelectionModel<CategoryNode> SELECTION_MODEL2 = 
+			new SingleSelectionModel<CategoryNode>();
+	static {
+		SELECTION_MODEL2.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+			public void onSelectionChange(SelectionChangeEvent event) {
+				CategoryNode selected = ((SingleSelectionModel<CategoryNode>) SELECTION_MODEL2)
+						.getSelectedObject();
+				if (selected != null) {
+					// Window.alert("You selected: " + selected);
+				}
+			}
+		});
+	}
+	
 	/**
 	 * This is the entry point method.
 	 */
@@ -353,7 +366,13 @@ public class DtcExam implements EntryPoint {
 		final ListDataProvider<CategoryNode> rootProvider = new ListDataProvider<CategoryNode>(categorynodes);
 	
 		class MyTreeViewModel implements TreeViewModel {
+			private final SelectionModel<CategoryNode> selectionModel;
 			final Map<String, ListDataProvider<ContactInfo>> dataProviderMap = new HashMap<String, ListDataProvider<ContactInfo>>();
+			
+			public MyTreeViewModel(final SelectionModel<CategoryNode> selectionModel) {
+				this.selectionModel = selectionModel;
+			}
+			
 			@Override
 			public <T> NodeInfo<?> getNodeInfo(T value) {
 				if (value == null) {
@@ -427,7 +446,7 @@ public class DtcExam implements EntryPoint {
 				}
 			}
 		};
-		final MyTreeViewModel treeViewModel = new MyTreeViewModel();
+		final MyTreeViewModel treeViewModel = new MyTreeViewModel(SELECTION_MODEL2);
 		final CellBrowser browser = new CellBrowser(treeViewModel, null);
 		browser.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.ENABLED);
 		
@@ -437,13 +456,10 @@ public class DtcExam implements EntryPoint {
 				treeViewModel.add(contactInfo);
 				treeViewModel.addProvider(contactInfo);
 				treeViewModel.refresh();
+				treeViewModel.selectionModel.isSelected(categorynodes.get(treeViewModel.getIndex(contactInfo.getCategory())));
 				if (!browser.getRootTreeNode().isChildOpen(treeViewModel.getIndex(contactInfo.getCategory()))) {
 					browser.getRootTreeNode().setChildOpen(treeViewModel.getIndex(contactInfo.getCategory()), true);
-				} else {
-					java.lang.System.out.println("already open");
-				}
-				
-				
+				} 				
 			}
 		};
 		

@@ -40,6 +40,9 @@ final class ContactInfoCell extends AbstractCell<ContactInfo> {
 		else if (contactInfo.getName().equals("Kuwon")) {
 			image.setUrl("http://cfs13.tistory.com/upload_control/download.blog?fhandle=YmxvZzIwNTg2QGZzMTMudGlzdG9yeS5jb206L2F0dGFjaC8wLzI3MDAwMDAwMDAwNy5qcGc%3D");
 		}
+		else if (contactInfo.getName().equals("Kim")) {
+			image.setUrl("http://tv02.search.naver.net/ugc?t=r180&q=http://cafefiles.naver.net/20111231_114/yeondle3_1325314932269ascXG_jpg/2010-08-04_22%3B06%3B57_yeondle3.jpg");
+		}
 		else {
 			image.setUrl("http://t1.gstatic.com/images?q=tbn:ANd9GcSlCSbbm87uDJiPgjXdvfq6msCJf3v9Jb6XYrEn2CtkyYGrFhBJ3Q");
 		}
