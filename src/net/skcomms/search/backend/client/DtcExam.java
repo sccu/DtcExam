@@ -8,6 +8,8 @@ import java.util.Map;
 import net.skcomms.search.backend.shared.ContactInfo;
 import net.skcomms.search.backend.shared.FieldVerifier;
 
+import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -17,6 +19,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellBrowser;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSelectionPolicy;
@@ -78,7 +81,7 @@ public class DtcExam implements EntryPoint {
 		addJangPanel("Jang's Contact Browser");
 		addPersonalPanel("Kang's Contact List");
 		addPersonalPanel("Kuwon's Contact List");
-		addPersonalPanel("Kim's Contact List");
+		addKimPanel("Kim's Contact List");
 		addPersonalPanel("Seok's Contact List");
 		addPersonalPanel("Shin's Contact List");
 	    
@@ -211,6 +214,137 @@ public class DtcExam implements EntryPoint {
 					categories.add(contactInfo.getCategory());
 				}
 				treeViewModel.refresh();
+			}
+		};
+		
+		widgetDataMap.put(browser, box);
+		stackLayoutPanel.add(browser, header, 2);
+	}
+	
+	public static class CategoryNode {
+		private final String Categoryname;
+		private final List<ContactInfo> contactInfos = new ArrayList<ContactInfo>();
+        
+		public CategoryNode(String Categoryname) {
+			this.Categoryname = Categoryname;
+		}
+        
+		public String getCategoryName() {
+			return Categoryname;
+		}
+        
+		public List<ContactInfo> getContactInfos() {
+			return contactInfos;
+		}
+		
+		public ContactInfo addInfo(ContactInfo contactInfo) {
+			contactInfos.add(contactInfo);
+			return contactInfo;
+		}       
+	}
+	
+	private void addKimPanel(String header) {
+		final List<CategoryNode> categorynodes;
+		categorynodes = new ArrayList<CategoryNode>();
+		
+		CategoryNode myself = new CategoryNode("Myself");
+		myself.addInfo(new ContactInfo("Kim", "Kim@sk.com", "Myself"));
+		categorynodes.add(myself);	
+		
+		final ListDataProvider<CategoryNode> rootProvider = new ListDataProvider<CategoryNode>(categorynodes);
+	
+		class MyTreeViewModel implements TreeViewModel {
+			final Map<String, ListDataProvider<ContactInfo>> dataProviderMap = new HashMap<String, ListDataProvider<ContactInfo>>();
+			@Override
+			public <T> NodeInfo<?> getNodeInfo(T value) {
+				if (value == null) {
+					Cell<CategoryNode> cell = new AbstractCell<CategoryNode>(){
+						@Override
+						public void render( Context context, CategoryNode value, SafeHtmlBuilder sb) {
+							sb.appendEscaped(value.getCategoryName());
+						}
+					};
+					return new DefaultNodeInfo<CategoryNode>(rootProvider, cell);
+				}
+				else if (value instanceof CategoryNode) {
+					String CategoryName = ((CategoryNode) value).getCategoryName();
+					ListDataProvider<ContactInfo> provider;
+					
+					if (dataProviderMap.containsKey(CategoryName)) {
+						provider = dataProviderMap.get(CategoryName);
+					} else { // 하드코딩 대비 ex) Myself
+						provider = new ListDataProvider<ContactInfo>();
+						provider.getList().addAll(((CategoryNode) value).getContactInfos());
+						dataProviderMap.put(CategoryName, provider);
+					}				
+					return new DefaultNodeInfo<ContactInfo>(provider, ContactInfoCell.getInstacne());
+				}
+				return null;
+			}
+
+			@Override
+			public boolean isLeaf(Object value) {
+				return (value instanceof ContactInfo);
+			}
+			
+			public void refresh() {
+				rootProvider.refresh();	
+			}
+			
+			public void addProvider(ContactInfo contactInfo) {
+				String categoryname = contactInfo.getCategory();
+				
+				if(!dataProviderMap.containsKey(categoryname)) {
+					ListDataProvider<ContactInfo> provider = new ListDataProvider<ContactInfo>();
+					dataProviderMap.put(categoryname, provider);
+					provider.getList().add(contactInfo);
+				} else {
+					ListDataProvider<ContactInfo> provider = dataProviderMap.get(categoryname);
+					if (!provider.getList().contains(contactInfo)) {
+						provider.getList().add(contactInfo);
+					}
+				}
+	
+			}
+			
+			public int getIndex(String CategoryName) {
+				int Index = -1;
+				for( int i=0; i<categorynodes.size(); i++) {
+					if (CategoryName.equals(categorynodes.get(i).getCategoryName())) {
+						Index = i;
+					}
+				}
+				return Index;
+			}
+			
+			public void add(ContactInfo contactInfo) {
+				if (this.getIndex(contactInfo.getCategory())<0) {
+					categorynodes.add(new CategoryNode(contactInfo.getCategory()));	
+				}
+				if (!categorynodes.get(this.getIndex(contactInfo.getCategory())).getContactInfos().contains(contactInfo)) {
+                    categorynodes.get(this.getIndex(contactInfo.getCategory())).addInfo(contactInfo);
+				} else {
+					java.lang.System.out.println("already exx");
+				}
+			}
+		};
+		final MyTreeViewModel treeViewModel = new MyTreeViewModel();
+		final CellBrowser browser = new CellBrowser(treeViewModel, null);
+		browser.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.ENABLED);
+		
+		DataBox<ContactInfo> box = new DataBox<ContactInfo>() {
+			@Override
+			public void add(ContactInfo contactInfo) {
+				treeViewModel.add(contactInfo);
+				treeViewModel.addProvider(contactInfo);
+				treeViewModel.refresh();
+				if (!browser.getRootTreeNode().isChildOpen(treeViewModel.getIndex(contactInfo.getCategory()))) {
+					browser.getRootTreeNode().setChildOpen(treeViewModel.getIndex(contactInfo.getCategory()), true);
+				} else {
+					java.lang.System.out.println("already open");
+				}
+				
+				
 			}
 		};
 		
