@@ -10,6 +10,7 @@ import net.skcomms.search.backend.shared.FieldVerifier;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dev.shell.Jsni;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -81,7 +82,7 @@ public class DtcExam implements EntryPoint {
 		
 		addPersonalPanel("Jang's Contact List");
 		addJangPanel("Jang's Contact Browser");
-		addKangPanel("Kang's Contact List");
+		addKangPanel("Kang's Contact Tree");
 		addPersonalPanel("Kuwon's Contact List");
 		addKimPanel("Kim's Contact List");
 		addPersonalPanel("Seok's Contact List");
@@ -408,6 +409,10 @@ public class DtcExam implements EntryPoint {
 		}
 	}
 	
+	public final static native void alert(String msg) /*-{
+		$wnd.alert(msg);
+	}-*/;
+	
 	private void addKangPanel(String header) {
 		class KangsTreeViewModel implements TreeViewModel {
 			final List<Category> categories = new ArrayList<Category>();
@@ -424,6 +429,8 @@ public class DtcExam implements EntryPoint {
 			public List<Category> getRootList() {
 				return categories;
 			}
+			
+			
 				
 			public <T> NodeInfo<?> getNodeInfo(T value) {
 				if (value == null) { // root node
@@ -440,7 +447,6 @@ public class DtcExam implements EntryPoint {
 					for (ContactInfo contactInfo : ((Category) value).getContactInfos()) {
 						if (contactInfo.getCategory().equals(value)) {
 							dataProvider.getList().add(contactInfo);
-							
 						}
 					}
 					
@@ -456,6 +462,8 @@ public class DtcExam implements EntryPoint {
 			}
 
 			public void refresh(Category category) {
+				if (category == null)
+					return;
 				rootProvider.refresh();
 				providerMap.get(category).refresh();
 			}
@@ -472,7 +480,7 @@ public class DtcExam implements EntryPoint {
 			
 			public void add(ContactInfo contactInfo) {
 				if (this.getIndex(contactInfo.getCategory())<0) {
-					categories.add(new Category(contactInfo.getCategory()));	
+					categories.add(new Category(contactInfo.getCategory()));
 					java.lang.System.out.println("OK");
 				}
 				if (!categories.get(this.getIndex(contactInfo.getCategory())).contactInfos.contains(contactInfo)) {
@@ -481,7 +489,7 @@ public class DtcExam implements EntryPoint {
 					java.lang.System.out.println("Not");
 				}
 			}
-		}
+		};
 			
 		final List<ContactInfo> values = new ArrayList<ContactInfo>();
 		
@@ -493,6 +501,7 @@ public class DtcExam implements EntryPoint {
 			public void add(ContactInfo contactInfo) {
 				List<Category> categories = kangsTreeViewModel.getRootList();
 				kangsTreeViewModel.add(contactInfo);
+				alert(contactInfo.getCategory() + " " + contactInfo.getName() + " added in Kang's ContactTree.");
 				kangsTreeViewModel.refresh(categories.get(kangsTreeViewModel.getIndex(contactInfo.getCategory())));
 			}
 		};
